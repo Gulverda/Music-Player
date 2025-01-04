@@ -4,35 +4,40 @@ const Artist = require('../models/artist/Artist.model');
 const getAllArtists = async (req, res) => {
   try {
     const artists = await Artist.find();
-    res.status(200).json(artists);
+    res.json(artists);
   } catch (err) {
-    res.status(500).json({ message: 'Error retrieving artists', error: err });
+    res.status(500).json({ error: 'Failed to fetch artists' });
   }
 };
 
-// Get a single artist by ID
+// Get a specific artist by ID
 const getArtist = async (req, res) => {
+  const { id } = req.params;
   try {
-    const artist = await Artist.findById(req.params.id);
+    const artist = await Artist.findById(id);
     if (!artist) {
-      return res.status(404).json({ message: 'Artist not found' });
+      return res.status(404).json({ error: 'Artist not found' });
     }
-    res.status(200).json(artist);
+    res.json(artist);
   } catch (err) {
-    res.status(500).json({ message: 'Error retrieving artist', error: err });
+    res.status(500).json({ error: 'Failed to fetch artist' });
   }
 };
 
 // Create a new artist
 const createArtist = async (req, res) => {
+  const { name, genre, bio } = req.body;
   try {
-    const { name, bio, image } = req.body;
-    const newArtist = new Artist({ name, bio, image });
-    const savedArtist = await newArtist.save();
-    res.status(201).json(savedArtist);
+    const newArtist = new Artist({ name, genre, bio });
+    await newArtist.save();
+    res.status(201).json(newArtist);
   } catch (err) {
-    res.status(500).json({ message: 'Error creating artist', error: err });
+    res.status(500).json({ error: 'Failed to create artist' });
   }
 };
 
-module.exports = { getAllArtists, getArtist, createArtist };
+module.exports = {
+  getAllArtists,
+  getArtist,
+  createArtist,
+};

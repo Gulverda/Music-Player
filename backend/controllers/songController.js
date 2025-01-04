@@ -3,43 +3,71 @@ const Song = require('../models/song/Song.model');
 // Get all songs
 const getAllSongs = async (req, res) => {
   try {
-    const songs = await Song.find().populate('artist').populate('album');
-    res.status(200).json(songs);
+    const songs = await Song.find();
+    res.json(songs);
   } catch (err) {
-    res.status(500).json({ message: 'Error retrieving songs', error: err });
+    res.status(500).json({ error: 'Failed to fetch songs' });
   }
 };
 
-// Get a single song by ID
+// Get a specific song by ID
 const getSong = async (req, res) => {
+  const { id } = req.params;
   try {
-    const song = await Song.findById(req.params.id).populate('artist').populate('album');
+    const song = await Song.findById(id);
     if (!song) {
-      return res.status(404).json({ message: 'Song not found' });
+      return res.status(404).json({ error: 'Song not found' });
     }
-    res.status(200).json(song);
+    res.json(song);
   } catch (err) {
-    res.status(500).json({ message: 'Error retrieving song', error: err });
+    res.status(500).json({ error: 'Failed to fetch song' });
   }
 };
 
 // Create a new song
 const createSong = async (req, res) => {
+  const { title, artist, duration } = req.body;
+
   try {
-    const { title, artist, album, genre, duration, url } = req.body;
+    const filePath = req.file.path; // Path of the uploaded MP3 file
+
     const newSong = new Song({
       title,
       artist,
-      album,
-      genre,
       duration,
-      url,
+      url: filePath, // Save file path as URL
     });
-    const savedSong = await newSong.save();
-    res.status(201).json(savedSong);
+
+    await newSong.save();
+    res.status(201).json(newSong);
   } catch (err) {
-    res.status(500).json({ message: 'Error creating song', error: err });
+    res.status(500).json({ error: 'Failed to create song' });
   }
 };
 
-module.exports = { getAllSongs, getSong, createSong };
+// Update an MP3 file for a song
+const updateSongFile = async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const song = await Song.findById(id);
+    if (!song) {
+      return res.status(404).json({ error: 'Song not found' });
+    }
+
+    // Update file path
+    song.url = req.file.path;
+    await song.save();
+
+    res.json({ message: 'Song file updated', song });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to update song file' });
+  }
+};
+
+module.exports = {
+  getAllSongs,
+  getSong,
+  createSong,
+  updateSongFile,
+};

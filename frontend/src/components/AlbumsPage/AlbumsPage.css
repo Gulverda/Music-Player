@@ -1,0 +1,66 @@
+/* AlbumsPage component styling */
+.albums-page {
+    padding: 20px;
+    background-color: #f4f4f4;
+    min-height: 100vh;
+  }
+  
+  h2 {
+    font-size: 2rem;
+    font-family: 'Arial', sans-serif;
+    color: #333;
+    margin-bottom: 20px;
+    text-align: center;
+  }
+  
+  .album-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    justify-content: center;
+  }
+  
+  .album-item {
+    width: 150px;
+    text-align: center;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+  
+  .album-item:hover {
+    transform: scale(1.05);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+  }
+  
+  .album-item img {
+    width: 100%;
+    border-radius: 8px;
+    object-fit: cover;
+  }
+  
+  .album-item p {
+    font-size: 1rem;
+    color: #333;
+    margin-top: 10px;
+  }
+  
+  .loading, .error {
+    font-size: 1.2rem;
+    color: #777;
+    text-align: center;
+  }
+  
+  /* Responsive design */
+  @media (max-width: 600px) {
+    .album-container {
+      gap: 10px;
+      justify-content: flex-start;
+    }
+  
+    .album-item {
+      width: 120px;
+    }
+  }
+  
