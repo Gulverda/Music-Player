@@ -1,15 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import './Playlist.css';
-
-interface Song {
-  id: string;
-  title: string;
-  url: string;
-}
+import { Song } from '../../App.tsx'; // Import Song type from App.tsx
 
 interface PlaylistProps {
-  onSongSelect: (songUrl: string, songTitle: string) => void;
+  onSongSelect: (song: Song) => void;
 }
 
 const Playlist: React.FC<PlaylistProps> = ({ onSongSelect }) => {
@@ -20,7 +15,7 @@ const Playlist: React.FC<PlaylistProps> = ({ onSongSelect }) => {
   useEffect(() => {
     const fetchSongs = async () => {
       try {
-        const response = await fetch(`${process.env.REACT_APP_API_URL}/api/albums/${albumId}/songs`); // Use the environment variable
+        const response = await fetch(`${process.env.REACT_APP_API_URL}/api/albums/${albumId}/songs`);
         if (!response.ok) {
           throw new Error('Failed to fetch songs');
         }
@@ -45,7 +40,7 @@ const Playlist: React.FC<PlaylistProps> = ({ onSongSelect }) => {
       <ul>
         {songs.map((song) => (
           <li key={`${song.id}-${song.title}`}> {/* Ensuring uniqueness */}
-            <button onClick={() => onSongSelect(song.url, song.title)}>
+            <button onClick={() => onSongSelect(song)}>
               {song.title}
             </button>
           </li>

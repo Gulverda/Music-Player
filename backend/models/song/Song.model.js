@@ -9,6 +9,7 @@ const songSchema = new mongoose.Schema(
     duration: { type: Number, required: true }, // in seconds
     url: { type: String, required: true },
     trackNumber: { type: Number }, // Optional: Track number in the album
+    songImage: { type: String, required: false }, // New image field (optional)
   },
   { timestamps: true }
 );

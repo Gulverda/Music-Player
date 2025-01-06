@@ -4,25 +4,43 @@ import Player from './components/Player/Player.tsx';
 import AlbumsPage from './components/AlbumsPage/AlbumsPage.tsx';
 import Playlist from './components/Playlist/Playlist.tsx';
 
+export interface Song {
+  id: any;
+  url: string;
+  title: string;
+  artist: string;
+  songImage: string;
+}
+
 const App: React.FC = () => {
-  const [currentSong, setCurrentSong] = useState<{ url: string; title: string }>({
+  const [currentSong, setCurrentSong] = useState<Song>({
+    id: null,
     url: '',
-    title: '',
+    title: 'No Song Selected',
+    artist: 'Unknown Artist',
+    songImage: 'default-image-url',
   });
 
-  const handleSongSelect = (songUrl: string, songTitle: string) => {
-    setCurrentSong({ url: songUrl, title: songTitle });
+  const handleSongSelect = (song: Song) => {
+    setCurrentSong(song); // Set the selected song
   };
 
   return (
     <Router>
       <div>
         <h1>Music Player</h1>
-        
-        {/* Player Component */}
-        <Player songUrl={currentSong.url} songTitle={currentSong.title} />
 
-        {/* Routes */}
+        {/* Render Player component only if currentSong has a valid URL */}
+        {currentSong.url && (
+          <Player
+            songUrl={currentSong.url}
+            songTitle={currentSong.title}
+            songArtist={currentSong.artist}
+            songImage={currentSong.songImage}
+          />
+        )}
+
+        {/* Routes for Albums and Playlist */}
         <Routes>
           <Route path="/albums" element={<AlbumsPage />} />
           <Route
