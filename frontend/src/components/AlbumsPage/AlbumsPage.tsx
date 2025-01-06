@@ -16,14 +16,14 @@ const AlbumsPage: React.FC = () => {
   useEffect(() => {
     const fetchAlbums = async () => {
       try {
-        const response = await fetch(`${process.env.REACT_APP_API_URL}/api/albums`); 
+        const response = await fetch(`${process.env.REACT_APP_API_URL}/api/albums`);
         if (!response.ok) {
           throw new Error('Failed to fetch albums');
         }
         const data = await response.json();
         setAlbums(data);
-      } catch (err) {
-        setError('Error fetching albums');
+      } catch (err: any) {
+        setError(err.message || 'Error fetching albums');
         console.error('Error fetching albums:', err);
       } finally {
         setLoading(false);
@@ -34,11 +34,16 @@ const AlbumsPage: React.FC = () => {
   }, []);
 
   if (loading) {
-    return <p className="loading">Loading albums...</p>;
+    return <div className="loading-spinner">Loading...</div>;
   }
 
   if (error) {
-    return <p className="error">{error}</p>;
+    return (
+      <div className="error-message">
+        <p>{error}</p>
+        <button onClick={() => window.location.reload()}>Retry</button>
+      </div>
+    );
   }
 
   return (
@@ -48,7 +53,11 @@ const AlbumsPage: React.FC = () => {
         {albums.map((album) => (
           <div key={album._id} className="album-item">
             <Link to={`/album/${album._id}`}>
-              <img src={album.coverImage} alt={album.title} />
+              <img
+                src={album.coverImage || '/default-placeholder.png'}
+                alt={album.title}
+                loading="lazy"
+              />
               <p>{album.title}</p>
             </Link>
           </div>

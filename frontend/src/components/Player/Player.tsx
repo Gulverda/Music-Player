@@ -6,45 +6,47 @@ interface PlayerProps {
   songTitle: string;
   songArtist: string;
   songImage: string;
+  songList: Array<{ url: string; title: string; artist: string; image: string }>;
+  currentSongIndex: number;
+  onSongChange: (newIndex: number) => void;
 }
 
-const Player: React.FC<PlayerProps> = ({ songUrl, songTitle, songArtist, songImage }) => {
+const Player: React.FC<PlayerProps> = ({
+  songUrl,
+  songTitle,
+  songArtist,
+  songImage,
+  songList,
+  currentSongIndex,
+  onSongChange,
+}) => {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
   const [currentTime, setCurrentTime] = useState<number>(0);
   const [duration, setDuration] = useState<number>(0);
 
-  // Build the full URL using the environment variable
-  const fullSongUrl = `${process.env.REACT_APP_API_URL}/uploads/${encodeURIComponent(songUrl)}`;
-
+  // Reset currentTime and duration when the song changes
   useEffect(() => {
-    if (audioRef.current && fullSongUrl) {
-      // Pause and load the song before attempting to play it
+    if (audioRef.current) {
       audioRef.current.pause();
       audioRef.current.load();
-
-      // Play only if it's ready to play
       audioRef.current.oncanplaythrough = () => {
-        audioRef.current?.play().catch((err) => console.error("Error playing song:", err));
-        setIsPlaying(true); // Automatically set to play state when song starts
+        audioRef.current?.play().catch((err) => console.error('Error playing song:', err));
+        setIsPlaying(true);
       };
+
+      // Reset currentTime and duration when the song URL changes
+      setCurrentTime(0);
+      setDuration(0);
     }
-  }, [fullSongUrl]);
+  }, [songUrl]);
 
   const togglePlayPause = () => {
     if (audioRef.current) {
       if (isPlaying) {
         audioRef.current.pause();
       } else {
-        // Wait until it's fully loaded and ready to play
-        if (audioRef.current.readyState >= 3) {
-          audioRef.current.play().catch((err) => console.error("Error playing song:", err));
-        } else {
-          // If it's not ready, wait for canplaythrough event
-          audioRef.current.oncanplaythrough = () => {
-            audioRef.current?.play().catch((err) => console.error("Error playing song:", err));
-          };
-        }
+        audioRef.current.play().catch((err) => console.error('Error playing song:', err));
       }
       setIsPlaying(!isPlaying);
     }
@@ -53,9 +55,12 @@ const Player: React.FC<PlayerProps> = ({ songUrl, songTitle, songArtist, songIma
   const handleTimeUpdate = () => {
     if (audioRef.current) {
       setCurrentTime(audioRef.current.currentTime);
-      if (!duration && audioRef.current.duration) {
-        setDuration(audioRef.current.duration);
-      }
+    }
+  };
+
+  const handleLoadedMetadata = () => {
+    if (audioRef.current) {
+      setDuration(audioRef.current.duration);
     }
   };
 
@@ -66,6 +71,24 @@ const Player: React.FC<PlayerProps> = ({ songUrl, songTitle, songArtist, songIma
       const newTime = (clickPosition / progressBar.offsetWidth) * duration;
       audioRef.current.currentTime = newTime;
       setCurrentTime(newTime);
+    }
+  };
+
+  const handlePrevious = () => {
+    if (audioRef.current) {
+      if (currentTime > 5) {
+        // If more than 5 seconds played, restart the current song
+        audioRef.current.currentTime = 0;
+      } else if (currentSongIndex > 0) {
+        // If less than 5 seconds, go to the previous song
+        onSongChange(currentSongIndex - 1);
+      }
+    }
+  };
+
+  const handleNext = () => {
+    if (currentSongIndex < songList.length - 1) {
+      onSongChange(currentSongIndex + 1);
     }
   };
 
@@ -99,24 +122,26 @@ const Player: React.FC<PlayerProps> = ({ songUrl, songTitle, songArtist, songIma
         <span>{formatTime(duration)}</span>
       </div>
       <div className="controls">
-        <button className="control-btn">⏮</button>
+        <button className="control-btn" onClick={handlePrevious} disabled={currentSongIndex === 0 && currentTime <= 5}>
+          ⏮
+        </button>
         <button className="play-pause-btn" onClick={togglePlayPause}>
           {isPlaying ? '⏸' : '▶️'}
         </button>
-        <button className="control-btn">⏭</button>
+        <button className="control-btn" onClick={handleNext} disabled={currentSongIndex === songList.length - 1}>
+          ⏭
+        </button>
       </div>
-      {fullSongUrl && (
-        <audio
-          ref={audioRef}
-          src={fullSongUrl}
-          onTimeUpdate={handleTimeUpdate}
-          onLoadedMetadata={handleTimeUpdate}
-          onError={(e) => {
-            console.error('Audio error occurred:', e.currentTarget.error);
-            alert('An error occurred while loading the audio. Please check the console for details.');
-          }}
-        ></audio>
-      )}
+      <audio
+        ref={audioRef}
+        src={`${process.env.REACT_APP_API_URL}/uploads/${encodeURIComponent(songUrl)}`}
+        onTimeUpdate={handleTimeUpdate}
+        onLoadedMetadata={handleLoadedMetadata}
+        onError={(e) => {
+          console.error('Audio error occurred:', e.currentTarget.error);
+          alert('An error occurred while loading the audio. Please check the console for details.');
+        }}
+      ></audio>
     </div>
   );
 };

@@ -36,10 +36,10 @@ const App: React.FC = () => {
             songUrl={currentSong.url}
             songTitle={currentSong.title}
             songArtist={currentSong.artist}
-            songImage={currentSong.songImage}
-          />
+            songImage={currentSong.songImage} songList={[]} currentSongIndex={0} onSongChange={function (newIndex: number): void {
+              throw new Error('Function not implemented.');
+            } }          />
         )}
-
         {/* Routes for Albums and Playlist */}
         <Routes>
           <Route path="/albums" element={<AlbumsPage />} />
